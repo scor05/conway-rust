@@ -28,7 +28,7 @@ impl Framebuffer {
     }
 
     pub fn set_pixel(&mut self, x: u32, y: u32) {
-        if !(x > self.width || y > self.height) {
+        if x < self.width || y < self.height {
             self.color_buffer
                 .draw_pixel(x as i32, y as i32, self.current_color);
         }
@@ -48,8 +48,36 @@ impl Framebuffer {
 
     pub fn swap_buffers(&mut self, window: &mut RaylibHandle, raylib_thread: &RaylibThread) {
         if let Ok(texture) = window.load_texture_from_image(raylib_thread, &self.color_buffer) {
+            let win_height = window.get_render_height();
+            let win_width = window.get_render_width();
+
             let mut renderer = window.begin_drawing(raylib_thread);
-            renderer.draw_texture(&texture, 0, 0, Color::WHITE);
+
+            // escalar pixeles si framebuffer es más pequeño que la ventana
+            if self.height < win_height as u32 && self.width < win_width as u32 {
+                let source = Rectangle::new(0.0, 0.0, self.width as f32, self.height as f32);
+                let dest = Rectangle::new(0.0, 0.0, win_width as f32, win_height as f32);
+
+                /*
+                 * parámetros de pro:
+                 * la textura
+                 * source_rect: parte de la textura que usa (crop)
+                 * dest_rect: tamaño a lo que se escalará el source_rect
+                 * origin: pivote para posicionar/rotar dest_rect
+                 * rotation
+                 * tint: color que se le multiplica la imagen
+                 */
+                renderer.draw_texture_pro(
+                    &texture,
+                    source,
+                    dest,
+                    Vector2::new(0.0, 0.0),
+                    0.0,
+                    Color::WHITE,
+                );
+            } else {
+                renderer.draw_texture(&texture, 0, 0, Color::WHITE);
+            }
         }
     }
 }
