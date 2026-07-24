@@ -9,7 +9,15 @@ pub struct Framebuffer {
     pub current_color: Color,
 }
 
-// SEGUIR EL ORDEN: Clear (framebuffer) -> Update (cambiar variables) -> Render
+/*
+ * Para dibujar:
+ *  - Escuchar input (usuario)
+ *  - Limpiar frame anterior
+ *  - Preparar variables / actualizarlas
+ *  - Pintar al buffer
+ *  - Pintar el buffer a la ventana (swap/flip buffers)
+ *  - Esperar (vsync)
+ * */
 impl Framebuffer {
     pub fn new(width: u32, height: u32) -> Self {
         let color_buffer = Image::gen_image_color(width as i32, height as i32, Color::BLACK);
@@ -44,6 +52,10 @@ impl Framebuffer {
 
     pub fn render_to_file(&self, file_path: &str) {
         self.color_buffer.export_image(file_path);
+    }
+
+    pub fn get_color(&self, x: u32, y: u32) -> Color {
+        return self.color_buffer.get_color(x as i32, y as i32);
     }
 
     pub fn swap_buffers(&mut self, window: &mut RaylibHandle, raylib_thread: &RaylibThread) {
