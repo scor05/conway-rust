@@ -36,7 +36,7 @@ impl Framebuffer {
     }
 
     pub fn set_pixel(&mut self, x: u32, y: u32) {
-        if x < self.width || y < self.height {
+        if x < self.width && y < self.height {
             self.color_buffer
                 .draw_pixel(x as i32, y as i32, self.current_color);
         }
